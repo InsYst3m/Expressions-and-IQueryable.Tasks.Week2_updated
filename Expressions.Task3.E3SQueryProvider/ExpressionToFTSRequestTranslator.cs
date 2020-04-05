@@ -38,18 +38,27 @@ namespace Expressions.Task3.E3SQueryProvider
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
+            Expression left = node.Left;
+            Expression right = node.Right;
+
             switch (node.NodeType)
             {
                 case ExpressionType.Equal:
                     if (node.Left.NodeType != ExpressionType.MemberAccess)
-                        throw new NotSupportedException($"Left operand should be property or field: {node.NodeType}");
+                    {
+                        left = node.Right;
+                        right = node.Left;
+                    }
 
-                    if (node.Right.NodeType != ExpressionType.Constant)
-                        throw new NotSupportedException($"Right operand should be constant: {node.NodeType}");
+                    if (left != null && left.NodeType != ExpressionType.MemberAccess)
+                        throw new NotSupportedException(string.Format("Left operand should be property or field", node.NodeType));
 
-                    Visit(node.Left);
+                    if (right != null && right.NodeType != ExpressionType.Constant)
+                        throw new NotSupportedException(string.Format("Right operand should be constant", node.NodeType));
+
+                    Visit(left);
                     _resultStringBuilder.Append("(");
-                    Visit(node.Right);
+                    Visit(right);
                     _resultStringBuilder.Append(")");
                     break;
 
