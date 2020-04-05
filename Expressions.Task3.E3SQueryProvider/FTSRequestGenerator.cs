@@ -26,21 +26,21 @@ namespace Expressions.Task3.E3SQueryProvider
 
         public Uri GenerateRequestUrl<T>(string query = "*", int start = 0, int limit = 10)
         {
-            return GenerateRequestUrl(typeof(T), query, start, limit);
+            return GenerateRequestUrl(typeof(T), new List<string> { query }, start, limit);
         }
 
-        public Uri GenerateRequestUrl(Type type, string query = "*", int start = 0, int limit = 10)
+        public Uri GenerateRequestUrl(Type type, string query, int start = 0, int limit = 10)
+        {
+            return GenerateRequestUrl(type, new List<string> { query }, start, limit);
+        }
+
+        public Uri GenerateRequestUrl(Type type, IList<string> queries, int start = 0, int limit = 10)
         {
             string metaTypeName = GetMetaTypeName(type);
 
             var ftsQueryRequest = new FtsQueryRequest
             {
-                Statements = new List<Statement>
-                {
-                    new Statement {
-                        Query = query
-                    }
-                },
+                Statements = queries.Select(q => new Statement() { Query = q }).ToList(),
                 Start = start,
                 Limit = limit
             };
