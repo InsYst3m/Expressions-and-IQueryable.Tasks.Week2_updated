@@ -22,6 +22,7 @@ namespace Expressions.Task3.E3SQueryProvider.Test
         [Fact]
         public void TestAndQueryable()
         {
+            var expectedResult = @"{""statements"":[{""query"":""Workstation:(EPRUIZHW006)""},{""query"":""Manager:(John*)""}],""filters"":null,""sorting"":null,""start"":0,""limit"":10}";
             var translator = new ExpressionToFtsRequestTranslator();
             Expression<Func<IQueryable<EmployeeEntity>, IQueryable<EmployeeEntity>>> expression
                 = query => query.Where(e => e.Workstation == "EPRUIZHW006" && e.Manager.StartsWith("John"));
@@ -33,9 +34,12 @@ namespace Expressions.Task3.E3SQueryProvider.Test
                 // Operator between queries is AND, in other words result set will fit to both statements above
               ],
              */
+            var translated = translator.TranslateAnd(expression);
+            var requestGenerator = new FtsRequestGenerator("https://telescope.epam.com/eco/rest/e3s-eco-scripting-impl/0.1.0/");
+            var result = requestGenerator.GetSerializedRequest(typeof(EmployeeEntity), translated);
 
             // todo: create asserts for this test by yourself, because they will depend on your final implementation
-            throw new NotImplementedException("Please implement this test and the appropriate functionality");
+            Assert.Equal(expectedResult, result);
         }
 
         #endregion

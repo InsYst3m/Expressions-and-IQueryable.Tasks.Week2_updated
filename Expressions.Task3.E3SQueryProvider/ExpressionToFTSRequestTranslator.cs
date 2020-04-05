@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,10 +9,12 @@ namespace Expressions.Task3.E3SQueryProvider
     public class ExpressionToFtsRequestTranslator : ExpressionVisitor
     {
         readonly StringBuilder _resultStringBuilder;
+        readonly List<string> _multipleConditions;
 
         public ExpressionToFtsRequestTranslator()
         {
             _resultStringBuilder = new StringBuilder();
+            _multipleConditions = new List<string>();
         }
 
         public string Translate(Expression exp)
@@ -19,6 +22,13 @@ namespace Expressions.Task3.E3SQueryProvider
             Visit(exp);
 
             return _resultStringBuilder.ToString();
+        }
+
+        public IList<string> TranslateAnd(Expression exp)
+        {
+            Visit(exp);
+
+            return _multipleConditions;
         }
 
         #region protected methods
@@ -97,9 +107,20 @@ namespace Expressions.Task3.E3SQueryProvider
                     _resultStringBuilder.Append(")");
                     break;
 
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                    var leftTranslator = new ExpressionToFtsRequestTranslator();
+                    var leftCondition = leftTranslator.Translate(left);
+                    _multipleConditions.Add(leftCondition);
+
+                    var rightTranslator = new ExpressionToFtsRequestTranslator();
+                    var rightCondition = rightTranslator.Translate(right);
+                    _multipleConditions.Add(rightCondition);
+                    break;
+
                 default:
                     throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
-            };
+            }
 
             return node;
         }
@@ -121,3 +142,4 @@ namespace Expressions.Task3.E3SQueryProvider
         #endregion
     }
 }
+

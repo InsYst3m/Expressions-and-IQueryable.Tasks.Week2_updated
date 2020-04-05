@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Expressions.Task3.E3SQueryProvider
 {
     public class FtsRequestGenerator
     {
-        private readonly string _FTSSearchTemplate = @"/searchFts";
+        private readonly string _FTSSearchTemplate = @"data/searchFts";
         private readonly string _baseAddress;
 
         #region Constructors
@@ -54,6 +55,22 @@ namespace Expressions.Task3.E3SQueryProvider
                 });
 
             return uri;
+        }
+
+        public string GetSerializedRequest(Type type, IList<string> queries, int start = 0, int limit = 10)
+        {
+            string metaTypeName = GetMetaTypeName(type);
+
+            var ftsQueryRequest = new FtsQueryRequest
+            {
+                Statements = queries.Select(q => new Statement() { Query = q }).ToList(),
+                Start = start,
+                Limit = limit
+            };
+
+            var ftsQueryRequestString = JsonConvert.SerializeObject(ftsQueryRequest);
+
+            return ftsQueryRequestString;
         }
 
         #endregion
