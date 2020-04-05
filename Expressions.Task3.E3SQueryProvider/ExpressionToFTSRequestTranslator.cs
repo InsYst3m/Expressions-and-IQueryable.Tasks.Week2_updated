@@ -33,6 +33,37 @@ namespace Expressions.Task3.E3SQueryProvider
 
                 return node;
             }
+
+            if (node.Method.DeclaringType == typeof(string))
+            {
+                ConstantExpression expression = null;
+
+                switch (node.Method.Name)
+                {
+                    case "StartsWith":
+                        expression = Expression.Constant($"{(node.Arguments[0] as ConstantExpression)?.Value}*");
+                        break;
+
+                    case "EndsWith":
+                        expression = Expression.Constant($"*{(node.Arguments[0] as ConstantExpression)?.Value}");
+                        break;
+
+                    case "Contains":
+                        expression = Expression.Constant($"*{(node.Arguments[0] as ConstantExpression)?.Value}*");
+                        break;
+                }
+
+                var beforeMethodExpression = node.Object as MemberExpression;
+                if (beforeMethodExpression == null)
+                    throw new InvalidOperationException($"expression before method {node.Method.Name} is null.");
+
+                var comparisonExpression = Expression.Equal(beforeMethodExpression, expression);
+
+                var result = Visit(comparisonExpression) ?? throw new InvalidOperationException("Result expression is null.");
+
+                return result;
+            }
+
             return base.VisitMethodCall(node);
         }
 
