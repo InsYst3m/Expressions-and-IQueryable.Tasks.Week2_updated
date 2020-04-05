@@ -51,6 +51,10 @@ namespace Expressions.Task3.E3SQueryProvider
                     case "Contains":
                         expression = Expression.Constant($"*{(node.Arguments[0] as ConstantExpression)?.Value}*");
                         break;
+
+                    default:
+                        expression = Expression.Constant($"{(node.Arguments[0] as ConstantExpression)?.Value}");
+                        break;
                 }
 
                 var beforeMethodExpression = node.Object as MemberExpression;
